@@ -1,23 +1,23 @@
-FROM golang:1.17-alpine AS build
+FROM node:16-alpine AS build
 
 WORKDIR /app
-COPY go.mod .
-RUN go mod download
+COPY package*.json ./
+RUN npm ci
 COPY . .
-ENV CGO_ENABLED=0
-RUN go build \
-    -trimpath \
-    -ldflags="-s -w" \
-    -o /out/app ./cmd/api
+ENV NODE_ENV=production
+ENV VUE_APP_API_URL=/api
+RUN npm run build
 
-FROM alpine:3.15
-COPY --from=build /out/app /app
+
+FROM nginx:1.25-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html/store
 RUN adduser -D -s /sbin/nologin testuser && \
-    chown testuser:testuser /app && chmod +x /app
+    mkdir -p /tmp/nginx && \
+    sed -i 's|pid .*;|pid /tmp/nginx/nginx.pid;|' /etc/nginx/nginx.conf && \
+    chown -R testuser /var/cache/nginx /var/log/nginx /tmp/nginx
 USER testuser
-EXPOSE 8081
+EXPOSE 80
 
 HEALTHCHECK --interval=20s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget -qO- http://127.0.0.1:8081/store || exit 1
-
-ENTRYPOINT ["/app"]
+    CMD wget -qO- http://127.0.0.1/ || exit 1

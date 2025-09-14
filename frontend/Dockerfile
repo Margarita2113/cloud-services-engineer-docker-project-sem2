@@ -11,7 +11,7 @@ RUN npm run build
 
 FROM nginx:1.25-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html/store
+COPY --from=build /app/dist /usr/share/nginx/html/momo-store
 RUN adduser -D -s /sbin/nologin testuser && \
     mkdir -p /tmp/nginx && \
     sed -i 's|pid .*;|pid /tmp/nginx/nginx.pid;|' /etc/nginx/nginx.conf && \

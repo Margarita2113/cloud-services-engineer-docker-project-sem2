@@ -3,10 +3,10 @@ services:
     build:
       context: ./backend
     image: teodorriyce/docker-project-backend:latest
-    container_name: momo-backend
+    container_name: backend
     restart: unless-stopped
     ports:
-      - "9091:8081"
+      - "8081:8081"
     networks:
       - app-network
     read_only: true
@@ -20,7 +20,7 @@ services:
     build:
       context: ./frontend
     image: teodorriyce/docker-project-frontend:latest
-    container_name: momo-frontend
+    container_name: frontend
     restart: unless-stopped
     ports:
       - "80:80"
@@ -38,9 +38,9 @@ services:
 
 networks:
   app-network:
-    name: momo-app-network
+    name: app-network
     driver: bridge
 
 volumes:
   nginx-logs:
-    name: momo-nginx-logs
+    name: nginx-logs
